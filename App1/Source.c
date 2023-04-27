@@ -6,7 +6,7 @@
 int T1func1(int x);
 int T1func2(int x);
 double Function(int (*func1) (int), int (*func2) (int), int a);
-struct Person* PersonFunction();
+struct Person* PersonFunction(struct Person* persons);
 
 struct Detail
 {
