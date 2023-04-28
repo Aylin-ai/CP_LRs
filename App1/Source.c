@@ -3,9 +3,20 @@
 #include <stdlib.h>
 #include "time.h"
 
+typedef int(*TF)(int);
+typedef float(*F)(int, int);
+
 int T1func1(int x);
 int T1func2(int x);
-double Function(int (*func1) (int), int (*func2) (int), int a);
+double Function(TF func1, TF func2, int a);
+
+int T3func1(int a, int b);
+int T3func2(int a, int b);
+int T3func3(int a, int b);
+int T3func4(int a, int b);
+
+float (*fb(char c)) (int, int);
+
 struct Person* PersonFunction();
 
 struct Detail
@@ -23,29 +34,80 @@ struct Person
 	int age;
 };
 
-void main(void) 
+void main(void)
 {
 	srand(time(0));
 	setlocale(LC_ALL, "Rus");
 
-	#pragma region Task 2.5
+#pragma region Task 2.5
 
-	printf("%f\n\n", Function(T1func1, T1func2, 5));
+	printf("%.2f\n\n", Function(T1func1, T1func2, 5));
 
-	#pragma endregion
+#pragma endregion
 
-	#pragma region Task 5.6
+#pragma region Task 3
 
-	struct Detail details[10] = { {"detail1", rand() % 100, (rand() % 100) * 100},
-	{"detail2", rand() % 100, (rand() % 100) * 100} ,
-	{"detail3", rand() % 100, (rand() % 100) * 100} ,
-	{"detail4", rand() % 100, (rand() % 100) * 100} ,
-	{"detail5", rand() % 100, (rand() % 100) * 100} ,
-	{"detail6", rand() % 100, (rand() % 100) * 100} ,
-	{"detail7", rand() % 100, (rand() % 100) * 100} ,
-	{"detail8", rand() % 100, (rand() % 100) * 100} ,
-	{"detail9", rand() % 100, (rand() % 100) * 100} ,
-	{"detail10", rand() % 100, (rand() % 100) * 100} };
+	printf("%.2f\n", Function(T1func1, T1func2, 5));
+
+#pragma endregion
+
+#pragma region Task 4
+
+	int a, b;
+	int chose;
+	int result = 0;
+
+	while (1){
+		printf("–í—ã–±–µ—Ä–∏—Ç–µ –æ–¥–Ω–æ –∏–∑ 4 –¥–µ–π—Å—Ç–≤–∏–π:\n");
+		printf("1) –í–æ–∑–≤–µ–¥–µ–Ω–∏–µ —á–∏—Å–ª–∞ –∞ –≤ —Å—Ç–µ–ø–µ–Ω—å b\n");
+		printf("2) –£–º–Ω–æ–∂–µ–Ω–∏–µ —á–∏—Å–ª–∞ –∞ –Ω–∞ b\n");
+		printf("3) –û—Å—Ç–∞—Ç–æ–∫ –æ—Ç –¥–µ–ª–µ–Ω–∏—è –∞ –Ω–∞ b\n");
+		printf("4) –ü—Ä–æ–≤–µ—Ä–∫–∞ –∫—Ä–∞—Ç–Ω–æ—Å—Ç–∏ a –∏ b\n");
+		printf("5) –í—ã—Ö–æ–¥\n");
+
+		scanf_s("%d", &chose);
+
+		if (chose == 5)
+			break;
+
+		printf("–í–≤–µ–¥–∏—Ç–µ —á–∏—Å–ª–∞ a –∏ b:");
+		scanf_s("%d", &a);
+		scanf_s("%d", &b);
+
+		switch (chose)
+		{
+		case 1:
+			result = T3func1(a, b);
+			break;
+		case 2:
+			result = T3func2(a, b);
+			break;
+		case 3:
+			result = T3func3(a, b);
+			break;
+		case 4:
+			result = T3func4(a, b);
+			break;
+		default:
+			break;
+		}
+		printf("Result is %d\n", result);
+	}
+
+#pragma endregion
+
+#pragma region Task 5.6
+
+	struct Detail details[10] = { { "detail1", rand() % 100, (rand() % 100) * 100 },
+	{ "detail2", rand() % 100, (rand() % 100) * 100 },
+	{ "detail3", rand() % 100, (rand() % 100) * 100 },
+	{ "detail4", rand() % 100, (rand() % 100) * 100 },
+	{ "detail5", rand() % 100, (rand() % 100) * 100 },
+	{ "detail6", rand() % 100, (rand() % 100) * 100 },
+	{ "detail7", rand() % 100, (rand() % 100) * 100 },
+	{ "detail8", rand() % 100, (rand() % 100) * 100 },
+	{ "detail9", rand() % 100, (rand() % 100) * 100 },
+	{ "detail10", rand() % 100, (rand() % 100) * 100 } };
 
 
 	int expensiveDetail = details[0].price;
@@ -57,12 +119,17 @@ void main(void)
 			strcpy(detailName, details[i].name);
 		}
 	}
-	printf("—‡Ï‡ˇ ‰ÓÓ„‡ˇ ‰ÂÚ‡Î¸: %s, ÂÂ ˆÂÌ‡: %d\n\n", detailName, expensiveDetail);
-	
 
-	#pragma endregion
+	for (int i = 0; i < 10; i++){
+		printf("%s %d %d\n", details[i].name, details[i].price, details[i].quantity);
+	}
 
-	#pragma region Task 6.3
+	printf("The most expensive detail: %s, its price: %d\n\n", detailName, expensiveDetail);
+
+
+#pragma endregion
+
+#pragma region Task 6.3
 
 	struct Person* persons = malloc(5 * sizeof(struct Person));
 	persons = PersonFunction(persons);
@@ -74,8 +141,9 @@ void main(void)
 	}
 
 	free(persons);
+	scanf_s("%s", detailName);
 
-	#pragma endregion
+#pragma endregion
 
 }
 
@@ -87,22 +155,53 @@ int T1func2(int x) {
 	return x * x * x + x * x - 1;
 }
 
-double Function(int (*func1) (int), int (*func2) (int), int a) {
+double Function(TF func1, TF func2, int a){
 	return ((func1(a)) + func2(a)) / (double)func1(a);
+}
+
+
+int T3func1(int a, int b){
+	int x = raiseToPow(a, b);
+	return x;
+}
+int T3func2(int a, int b){
+	int x = a * b;
+	return x;
+}
+int T3func3(int a, int b){
+	int x = a % b;
+	return x;
+}
+int T3func4(int a, int b){
+	if (a % b == 0)
+		return 1;
+	else
+		return 0;
+}
+
+
+int raiseToPow(int x, int power)
+{
+	int result;
+	result = 1;
+	for (int i = 1; i <= power; i++){
+		result *= x;
+	}
+	return result;
 }
 
 struct Person* PersonFunction(struct Person* persons)
 {
 	for (int i = 0; i < 5; i++)
 	{
-		printf("¬‚Â‰ËÚÂ ‰‡ÌÌ˚Â Ó ˜ÂÎÓ‚ÂÍÂ %d\n", i);
-		printf("»Ïˇ: ");
+		printf("Enter the data of person %d\n", i + 1);
+		printf("Name: ");
 		scanf_s("%9s", persons[i].name, (unsigned)_countof(persons[i].name));
-		printf("‘‡ÏËÎËˇ: ");
+		printf("Surname: ");
 		scanf_s("%9s", persons[i].surname, (unsigned)_countof(persons[i].surname));
-		printf("ŒÚ˜ÂÒÚ‚Ó: ");
+		printf("Lastname: ");
 		scanf_s("%9s", persons[i].lastname, (unsigned)_countof(persons[i].lastname));
-		printf("¬ÓÁ‡ÒÚ: ");
+		printf("Age: ");
 		scanf_s("%d", &persons[i].age);
 	}
 	return persons;
