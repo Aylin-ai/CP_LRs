@@ -6,28 +6,27 @@
 
 
 struct T {
-	char surname[10];
-	char bookName[50];
-	char publisher[50];
-	char date[20];
+    char surname[10];
+    char bookName[50];
+    char publisher[50];
+    char date[20];
 };
 struct Detail
 {
-	char name[30];
-	float price;
-	int quantity;
+    char name[30];
+    float price;
+    int quantity;
 };
 FILE* File;
 
 int createFile(int n, struct T* f);
 int createFileWithDetails(int n, struct Detail* details);
 struct Detail getDetail(int n);
-void updateDetailQuantity(int n, int newQuantity);
-
+void changeValueInLine(int lineNumber, int newValue);
 
 void main(void) {
-	srand(time(0));
-	setlocale(LC_ALL, "Rus");
+    srand(time(0));
+    setlocale(LC_ALL, "Rus");
     /*
     #pragma region Task 1
 
@@ -67,11 +66,11 @@ void main(void) {
     #pragma endregion
     */
 
-    #pragma region Task 2.3.6
+#pragma region Task 2.3.6
 
-    updateDetailQuantity(1, 10);
+    changeValueInLine(2, 428);
 
-    #pragma endregion
+#pragma endregion
 
 
 
@@ -165,47 +164,73 @@ struct Detail getDetail(int n) {
     return detail;
 }
 
-void updateDetailQuantity(int n, int newQuantity) {
-    char* detail = (char*)malloc(50 * sizeof(char));
-
-    // Открытие файла в режиме чтения и записи
-    if (fopen_s(&File, "Details.txt", "r+")) {
+void changeValueInLine(int lineNumber, int newValue) {
+    FILE* file;
+    if (fopen_s(&file, "Details.txt", "r")) {
         printf("Не удалось открыть файл\n");
         exit(1);
     }
 
-    // Установка позиции в файле на запись под номером n
-    int recordSize = sizeof(struct Detail);
-    if (fseek(File, (n - 1) * recordSize, SEEK_SET) != 0) {
-        printf("Ошибка при установке позиции в файле.\n");
+    // Читаем все строки файла в память
+    char** lines = NULL;
+    char buffer[1024];
+    int lineCount = 0;
+    while (fgets(buffer, sizeof(buffer), file)) {
+        lines = (char**)realloc(lines, sizeof(char*) * (lineCount + 1));
+        lines[lineCount] = (char*)malloc(sizeof(char) * (strlen(buffer) + 1));
+        strcpy_s(lines[lineCount], strlen(buffer) + 1, buffer);
+        lineCount++;
+    }
+
+    // Закрываем файл
+    fclose(file);
+
+    // Изменяем нужную строку
+    if (lineNumber <= lineCount) {
+        char* line = lines[lineNumber - 1];
+
+        // Разбиваем строку на отдельные значения
+        char* token;
+        char* context = NULL;
+        token = strtok_s(line, " ", &context);
+        int currentTokenPosition = 1;
+        char newLine[1024] = { 0 };
+        while (token != NULL) {
+            if (currentTokenPosition == 3) {
+                // Меняем значение на новое
+                char newValueString[32] = { 0 };
+                sprintf_s(newValueString, sizeof(newValueString), "%d\n", newValue);
+                strcat_s(newLine, sizeof(newLine), newValueString);
+                if (token[strlen(token) - 1] != '\n') { // проверяем, является ли токен последним в строке
+                    strcat_s(newLine, sizeof(newLine), " ");
+                }
+            }
+            else {
+                strcat_s(newLine, sizeof(newLine), token);
+                strcat_s(newLine, sizeof(newLine), " ");
+            }
+            token = strtok_s(NULL, " ", &context);
+            currentTokenPosition++;
+        }
+
+        // Заменяем старую строку на новую
+        free(lines[lineNumber - 1]);
+        lines[lineNumber - 1] = (char*)malloc(sizeof(char) * (strlen(newLine) + 1));
+        strcpy_s(lines[lineNumber - 1], strlen(newLine) + 1, newLine);
+    }
+
+    // Открываем файл на перезапись
+    if (fopen_s(&file, "Details.txt", "w")) {
+        printf("Не удалось открыть файл\n");
         exit(1);
     }
 
-    // Считывание структуры из файла
-    fread(detail, recordSize, 1, File);
-
-    char* name = strtok_s(detail, " ", &detail);
-    char* price = strtok_s(detail, " ", &detail);
-    char* quantity = strtok_s(detail, " ", &detail);
-
-    char str[sizeof(name) + sizeof(price) + sizeof(quantity)] = "";
-
-    strcat_s(str, sizeof(name) + sizeof(price) + sizeof(quantity), name);
-    strcat_s(str, sizeof(name) + sizeof(price) + sizeof(quantity), " ");
-    strcat_s(str, sizeof(name) + sizeof(price) + sizeof(quantity), price);
-    strcat_s(str, sizeof(name) + sizeof(price) + sizeof(quantity), " ");
-    strcat_s(str, sizeof(name) + sizeof(price) + sizeof(quantity), quantity);
-
-
-    // Запись измененной структуры в файл
-    fseek(File, (n - 1) * recordSize, SEEK_SET);
-    if (fwrite(str, recordSize, 1, File) != 1) {
-        printf("Ошибка при записи в файл.\n");
-        exit(1);
+    // Перезаписываем все строки в файл
+    for (int i = 0; i < lineCount; i++) {
+        fprintf(file, "%s", lines[i]);
+        free(lines[i]);
     }
-    // Закрытие файла
-    fclose(File);
+    free(lines);
+
+    fclose(file);
 }
-
-
-
