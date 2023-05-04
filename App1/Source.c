@@ -8,6 +8,10 @@ typedef float(*F)(int, int);
 
 int T1func1(int x);
 int T1func2(int x);
+
+double Function(int (*func1) (int), int (*func2) (int), int a);
+struct Person* PersonFunction(struct Person* persons);
+
 double Function(TF func1, TF func2, int a);
 
 int T3func1(int a, int b);
