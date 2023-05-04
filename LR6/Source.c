@@ -22,7 +22,8 @@ FILE* File;
 
 int createFile(int n, struct T* f);
 int createFileWithDetails(int n, struct Detail* details);
-struct Detail getDetail(int n);
+void printEveryLine();
+void getDetail(int n);
 void changeValueInLine(int lineNumber, int newValue);
 
 typedef struct Node {
@@ -89,46 +90,67 @@ void main(void) {
     srand(time(0));
     setlocale(LC_ALL, "Rus");
 
-    /*
-    #pragma region Task 1
+    int n = 0;
+    char* detailName = malloc(20 * sizeof(char));
+    int newValue = 0;
 
-    int n;
-    printf("Enter the amount of details: ");
-    scanf_s("%d", &n);
-    struct Detail* details = (struct Detail*)malloc(n * sizeof(struct Detail));
-    int result = createFileWithDetails(n, details);
-    if (result == 0)
-        printf("Success");
-    else if (result == -1)
-    {
-        printf("Failure");
+    int choice = 0;
+    while (1) {
+        printf("Выберите:\n");
+        printf("1) Создание нового файл с деталями\n");
+        printf("2) Вывод всех деталей\n");
+        printf("3) Вывод деталей с определенным именем\n");
+        printf("4) Вывод детали под номером n\n");
+        printf("5) Изменение количества детали\n");
+        printf("6) Выход\n");
+        scanf_s("%d", &choice);
+
+        if (choice == 6)
+            break;
+
+        switch (choice)
+        {
+        case 1:
+            printf("Enter the amount of details: ");
+            scanf_s("%d", &n);
+            struct Detail* details = (struct Detail*)malloc(n * sizeof(struct Detail));
+            int result = createFileWithDetails(n, details);
+            if (result == 0)
+                printf("Success\n");
+            else if (result == -1)
+            {
+                printf("Failure\n");
+            }
+            free(details);
+            break;
+        case 2:
+            printEveryLine();
+            break;
+        case 3:
+            printf("Введите имя детали: ");
+            scanf_s("%s", detailName, 20);
+            int amountOfChosenDetail = countLinesWithSubstring(detailName);
+            printf("Деталей: %d\n", amountOfChosenDetail);
+            break;
+        case 4:
+            printf("Введите номер детали: ");
+            scanf_s("%d", &n);
+            getDetail(n);
+            break;
+        case 5:
+            printf("Введите номер детали, у которой хотите поменять количество: ");
+            scanf_s("%d", &n);
+            printf("Введите новое количество деталей: ");
+            scanf_s("%d", &newValue);
+            changeValueInLine(n, newValue);
+            printf("Успех\n");
+            break;
+        default:
+            break;
+        }
+
     }
-
-    #pragma endregion
-
-    #pragma region Task 2.1.6
-
-    char detailName[20] = "d2";
-    int amountOfChosenDetail = countLinesWithSubstring(detailName);
-    printf("%d", amountOfChosenDetail);
-
-    #pragma endregion
-
-    #pragma region Task 2.2
-
-    int n = 7;
-    struct Detail detail;
-    detail = getDetail(n);
-    printf("%s", detail.name);
-
-    #pragma endregion
-
-    #pragma region Task 2.3.6
-
-    changeValueInLine(2, 428);
-
-    #pragma endregion
-    */
+    
     
     /*
     #pragma region Part 2
@@ -197,7 +219,6 @@ int createFileWithDetails(int n, struct Detail* details) {
             printf("Detail`s quantity: ");
             scanf_s(" %d", &details[i].quantity);
             fprintf(File, "%s %.2f %d \n", details[i].name, details[i].price, details[i].quantity);
-            printf("%s %.2f %d\n", details[i].name, details[i].price, details[i].quantity);
         }
         fclose(File);
         return 0;
@@ -222,29 +243,35 @@ int countLinesWithSubstring(char* substring) {
     return count;
 }
 
-struct Detail getDetail(int n) {
+void printEveryLine() {
     if (fopen_s(&File, "Details.txt", "r")) {
         printf("Не удалось открыть файл\n");
         exit(1);
     }
 
-    // Определяем размер одной записи
-    int recordSize = sizeof(struct Detail);
+    char buffer[1024];
+    while (fgets(buffer, sizeof(buffer), File)) {
+        printf("%s", buffer);
+    }
+    fclose(File);
+}
 
-    // Устанавливаем позицию в файле на запись под номером n
-    if (fseek(File, (n - 1) * recordSize, SEEK_SET) != 0) {
-        printf("Ошибка при установке позиции в файле.\n");
+void getDetail(int n) {
+    if (fopen_s(&File, "Details.txt", "r")) {
+        printf("Не удалось открыть файл\n");
         exit(1);
     }
 
-    struct Detail detail;
-    fread(detail.name, sizeof(detail.name), 1, File);
-
-    // Закрываем файл
+    char buffer[1024];
+    int lineCount = 0;
+    while (fgets(buffer, sizeof(buffer), File)) {
+        lineCount++;
+        if (lineCount == n) {
+            printf("%s", buffer);
+            break;
+        }
+    }
     fclose(File);
-
-    // Возвращаем строку
-    return detail;
 }
 
 void changeValueInLine(int lineNumber, int newValue) {
@@ -282,11 +309,10 @@ void changeValueInLine(int lineNumber, int newValue) {
             if (currentTokenPosition == 3) {
                 // Меняем значение на новое
                 char newValueString[32] = { 0 };
-                sprintf_s(newValueString, sizeof(newValueString), "%d\n", newValue);
+                sprintf_s(newValueString, sizeof(newValueString), "%d\n ", newValue);
                 strcat_s(newLine, sizeof(newLine), newValueString);
-                if (token[strlen(token) - 1] != '\n') { // проверяем, является ли токен последним в строке
-                    strcat_s(newLine, sizeof(newLine), " ");
-                }
+                token = NULL;
+                break;
             }
             else {
                 strcat_s(newLine, sizeof(newLine), token);
