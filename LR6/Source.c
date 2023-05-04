@@ -4,6 +4,7 @@
 #include "time.h"
 #include <string.h>
 
+#define MAX_STR_LEN 20
 
 struct T {
     char surname[10];
@@ -24,9 +25,70 @@ int createFileWithDetails(int n, struct Detail* details);
 struct Detail getDetail(int n);
 void changeValueInLine(int lineNumber, int newValue);
 
+typedef struct Node {
+    char str[MAX_STR_LEN + 1];
+    struct Node* next;
+} Node;
+
+Node* createNode(char* str) {
+    Node* newNode = (Node*)malloc(sizeof(Node));
+    strcpy_s(newNode->str, MAX_STR_LEN + 1, str);
+    newNode->next = NULL;
+    return newNode;
+}
+
+void printList(Node* head) {
+    Node* current = head;
+    while (current != NULL) {
+        printf("%s\n", current->str);
+        current = current->next;
+    }
+}
+
+void deleteSecondLast(Node** head) {
+    if (*head == NULL || (*head)->next == NULL) {
+        return;
+    }
+    if ((*head)->next->next == NULL) {
+        Node* temp = (*head)->next;
+        free(temp);
+        (*head)->next = NULL;
+        return;
+    }
+    Node* current = *head;
+    while (current->next->next->next != NULL) {
+        current = current->next;
+    }
+    Node* temp = current->next;
+    current->next = temp->next;
+    free(temp);
+}
+
+void insertBeforeK(Node** head, int k, char* str) {
+    if (*head == NULL || k <= 1) {
+        // Если список пуст или k меньше или равно 1, то добавляем элемент в начало списка
+        Node* newNode = createNode(str);
+        newNode->next = *head;
+        *head = newNode;
+        return;
+    }
+    // Ищем k-ый элемент списка
+    Node* current = *head;
+    for (int i = 1; i < k - 1 && current->next != NULL; i++) {
+        current = current->next;
+    }
+    // Создаем новый элемент и вставляем его перед k-ым элементом
+    Node* newNode = createNode(str);
+    newNode->next = current->next;
+    current->next = newNode;
+}
+
+
+
 void main(void) {
     srand(time(0));
     setlocale(LC_ALL, "Rus");
+
     /*
     #pragma region Task 1
 
@@ -43,20 +105,16 @@ void main(void) {
     }
 
     #pragma endregion
-    */
 
-    /*
-    #pragma region Task 1.6
+    #pragma region Task 2.1.6
 
     char detailName[20] = "d2";
     int amountOfChosenDetail = countLinesWithSubstring(detailName);
     printf("%d", amountOfChosenDetail);
 
     #pragma endregion
-    */
 
-    /*
-    #pragma region Task 2
+    #pragma region Task 2.2
 
     int n = 7;
     struct Detail detail;
@@ -64,17 +122,42 @@ void main(void) {
     printf("%s", detail.name);
 
     #pragma endregion
-    */
 
-#pragma region Task 2.3.6
+    #pragma region Task 2.3.6
 
     changeValueInLine(2, 428);
 
-#pragma endregion
+    #pragma endregion
+    */
+    
+    /*
+    #pragma region Part 2
 
+    Node* head = createNode("Это 1 элемент");
+    Node* current = head;
 
+    // Добавляем остальные элементы
+    for (int i = 2; i <= 10; i++) {
+        char str[MAX_STR_LEN + 1];
+        sprintf_s(str, MAX_STR_LEN + 1, "Это %d элемент", i);
+        Node* newNode = createNode(str);
+        current->next = newNode;
+        current = current->next;
+    }
 
+    // Печатаем все элементы списка
+    printList(head);
+    printf("\n");
 
+    deleteSecondLast(&head);
+    printList(head);
+    printf("\n");
+
+    insertBeforeK(&head, 5, "Это новый элемент");
+    printList(head);
+
+    #pragma endregion
+    */
 }
 
 int createFile(int n, struct T* f) {
